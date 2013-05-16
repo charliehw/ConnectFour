@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>ConnectFour</title>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="js/main.js"></script>
+	<style>
+
+.col {height:600px; width:100px; float:left;}
+.col:hover {cursor:pointer; background:#eeeeff;}
+.cell {height:80px; width:80px; margin:10px; border-radius:50%; background:#ddd; float:left; position:relative;}
+.yellow .inner {background:yellow;}
+.red .inner {background:red;}
+.inner {-webkit-transition:-webkit-transform 0.3s ease-out; -webkit-transform:scale(0); height:80px; width:80px; border-radius:50%;}
+.disc .inner {-webkit-transform:scale(1);}
+
+	</style>
+</head>
+<body>
+	<div id="connect-four">
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+			<div class="cell">
+				<div class="inner"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
