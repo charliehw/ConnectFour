@@ -145,3 +145,33 @@ $(function () {
 
 });
 
+var cf = {};
+
+cf.Game = function () {
+
+	this.$cf = $('#connect-four'),
+	this.$cols = $('.col', $cf),
+	this.translations = translations = [
+		{x: 1, y: 0}, // Right
+		{x: 0, y: 1}, // Up
+		{x: 1, y: 1}, // Diagonal up right
+		{x: 1, y: -1} // Diagonal down right
+	];
+	this.grid = [ // The base grid where -1 is an empty cell
+		[-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1],
+		[-1,-1,-1,-1,-1,-1,-1]
+	];
+
+};
+
+cf.Game.prototype = {
+
+	_bind: function () {
+
+	}
+
+}
