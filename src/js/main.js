@@ -11,9 +11,10 @@ cf.Game = function () {
 
 	this.gameState = new cf.GameState();
 	this.ai = new cf.AI(this);
+
 	this.player = 0;
 	this.activePlayer = 0;
-	this.complete = false; // Set to true when a victory is attained
+	this._complete = false; // Set to true when a victory is attained
 
 	this.$container = $('#connect-four');
 	this.$cols = $('.col', this.$container);
@@ -30,28 +31,33 @@ cf.Game.prototype = {
 		this._bind();
 	},
 
+	makeTurn: function (colIndex) {
+		var result = this.gameState.addToColumn(colIndex, false, this.activePlayer),
+			self = this, victoryCells;
+		if (!result || this._complete) {
+			return;
+		}
+		this.gameState.totalTurns += 1;
+		this.$cols.eq(colIndex).find('.cell').eq(result.lastTurn.rowIndex).removeClass('red yellow').addClass((this.activePlayer === 0 ? 'disc yellow' : 'disc red'));
+		if (victoryCells = result.victoryCheck() || this.gameState.totalTurns >= this.gameState.totalCells) {
+			this._complete = true;
+			this._highlightCells(victoryCells);
+			window.setTimeout(function () {
+				self._reset();
+				new cf.Game();
+			}, 2000);
+		}
+		this.activePlayer = this.activePlayer === 0 ? 1 : 0;
+		if (this.activePlayer === 1) {
+			this.ai.makeTurn();
+		}
+	},
+
 	_bind: function () {
 		var self = this;
 		self.$cols.on('click', function () {
-			var colIndex = self.$cols.index($(this)),
-				result = self.gameState.addToColumn(colIndex, false, self.activePlayer),
-				victoryCells;
-			if (!result || self.complete) {
-				return;
-			}
-			self.$cols.eq(colIndex).find('.cell').eq(result.lastTurn.rowIndex).removeClass('red yellow').addClass((self.activePlayer === 0 ? 'disc yellow' : 'disc red'));
-			if (victoryCells = result.victoryCheck()) {
-				self.complete = true;
-				self._highlightCells(victoryCells);
-				window.setTimeout(function () {
-					self._reset();
-					new cf.Game();
-				}, 2000);
-			}
-			self.activePlayer = self.activePlayer === 0 ? 1 : 0;
-			if (self.activePlayer === 1) {
-				self.ai.findTurn();
-			}
+			var colIndex = self.$cols.index($(this));
+			self.makeTurn(colIndex);
 		});
 	},
 
@@ -71,14 +77,9 @@ cf.Game.prototype = {
 
 cf.GameState = function () {
 
-	this.grid = [ // The base grid where -1 is an empty cell
-		[-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1]
-	];
+	this.grid = this._createGrid(7, 6); // The base grid where -1 is an empty cell
+	this.totalCells = 7 * 6;
+	this.totalTurns = 0;
 
 };
 
@@ -89,7 +90,7 @@ cf.GameState.prototype = {
 	addToColumn: function (colIndex, preserve, id) {
 		var tempState, i;
 		if (preserve) {
-			tempState = this.clone();
+			tempState = this._clone();
 		} else {
 			tempState = this;
 		}
@@ -109,15 +110,20 @@ cf.GameState.prototype = {
 	},
 
 	victoryCheck: function () {
-		var cells, i, j;
+		var cells, i, j, row, col;
 		// Loop over each of the 4 directions
-		for (i = 0, l = this.translations.length; i < l; i++) {
+		for (i = 0, l = this._translations.length; i < l; i++) {
 			cells = [];
 			// Check along the line in that particular direction
 			for (j = -5; j < 5; j++) {
-				if (this.grid[this.lastTurn.rowIndex + (this.translations[i].y * j)] !== undefined) {
-					if (this.grid[this.lastTurn.rowIndex + this.translations[i].y * j][this.lastTurn.colIndex + this.translations[i].x * j] === this.lastTurn.player) {
-						cells.push({colIndex: this.lastTurn.colIndex + this.translations[i].x * j, rowIndex: this.lastTurn.rowIndex + this.translations[i].y * j});
+				row = this.lastTurn.rowIndex + (this._translations[i].y * j);
+				if (this.grid[row] !== undefined) {
+					col = this.lastTurn.colIndex + (this._translations[i].x * j);
+					if (this.grid[row][col] === this.lastTurn.player) {
+						cells.push({
+							rowIndex: row,
+							colIndex: col
+						});
 					} else {
 						// Maybe the line broke
 						cells = [];
@@ -130,13 +136,25 @@ cf.GameState.prototype = {
 		}
 	},
 
-	clone: function () {
+	_createGrid: function (x, y) {
+		var i, j, temp, result = [];
+		for (i = 0; i < y; i++) {
+			temp = [];
+			for (j = 0; j < x; j++) {
+				temp.push(-1);
+			}
+			result.push(temp);
+		}
+		return result;
+	},
+
+	_clone: function () {
 		var result = new cf.GameState();
 		result.grid = cf.utils.deepCopy(this.grid);
 		return result;
 	},
 
-	translations: [ // Static final
+	_translations: [ // Static final
 		{x: 1, y: 0}, // Right
 		{x: 0, y: 1}, // Up
 		{x: 1, y: 1}, // Diagonal up right
@@ -151,23 +169,26 @@ cf.Player = function (game, id) {
 };
 
 cf.AI = function (game) {
+
 	this.game = game;
+
 };
 
 cf.AI.prototype = {
 
-	findTurn: function () {
-		var scores = [0, 0, 0, 0, 0, 0, 0], i, colIndex;
-		scores = this.checkTurn(this.game.gameState, 4, this.game.activePlayer, scores, true);
+	makeTurn: function () {
+		var scores = [0, 0, 0, 0, 0, 0, 0], i, colIndex,
+			self = this;
+		scores = this._checkTurn(this.game.gameState, 4, this.game.activePlayer, scores, true);
 		for (i = 0; i < scores.length; i++) { // Find the highest score for a column that isn't full
 			if ((colIndex === undefined || scores[i] > scores[colIndex]) && this.game.gameState.addToColumn(i, true)) {
 				colIndex = i;
 			}
 		}
-		this.game.$cols.eq(colIndex).click();
+		self.game.makeTurn(colIndex);
 	},
 
-	checkTurn: function (state, count, id, scores, initial, scoreTracker) {
+	_checkTurn: function (state, count, id, scores, initial, scoreTracker) {
 		var result, i = 0, counter, p, victoryFound;
 		while (i < 7) {
 			p = id;
@@ -188,7 +209,7 @@ cf.AI.prototype = {
 				}
 				p = p === 0 ? 1 : 0;
 				if (counter-- > 0 && !victoryFound) {
-					this.checkTurn(result, counter, p, scores, false, scoreTracker);
+					this._checkTurn(result, counter, p, scores, false, scoreTracker);
 				}
 			}
 			i += 1;
