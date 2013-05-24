@@ -14,7 +14,7 @@ cf.Game = function () {
 
 	this.player = 0;
 	this.activePlayer = 0;
-	this._complete = false; // Set to true when a victory is attained
+	this._complete = false; // Set to true when victory or draw occurs
 
 	this.$container = $('#connect-four');
 	this.$cols = $('.col', this.$container);
@@ -49,15 +49,19 @@ cf.Game.prototype = {
 		}
 		this.activePlayer = this.activePlayer === 0 ? 1 : 0;
 		if (this.activePlayer === 1) {
-			this.ai.makeTurn();
+			window.setTimeout(function () { // Delay AI turn so browser can render
+				self.ai.makeTurn();
+			}, 20);
 		}
 	},
 
 	_bind: function () {
 		var self = this;
 		self.$cols.on('click', function () {
-			var colIndex = self.$cols.index($(this));
-			self.makeTurn(colIndex);
+			if (self.activePlayer === self.player) {
+				var colIndex = self.$cols.index($(this));
+				self.makeTurn(colIndex);
+			}
 		});
 	},
 
@@ -68,8 +72,10 @@ cf.Game.prototype = {
 
 	_highlightCells: function (cells) {
 		var i;
-		for (i = 0; i < cells.length; i++) {
-			this.$cols.eq(cells[i].colIndex).find('.cell').eq(cells[i].rowIndex).addClass('highlight');
+		if (cells) {
+			for (i = 0; i < cells.length; i++) {
+				this.$cols.eq(cells[i].colIndex).find('.cell').eq(cells[i].rowIndex).addClass('highlight');
+			}
 		}
 	}
 
@@ -115,7 +121,7 @@ cf.GameState.prototype = {
 		for (i = 0, l = this._translations.length; i < l; i++) {
 			cells = [];
 			// Check along the line in that particular direction
-			for (j = -5; j < 5; j++) {
+			for (j = -4; j < 4; j++) {
 				row = this.lastTurn.rowIndex + (this._translations[i].y * j);
 				if (this.grid[row] !== undefined) {
 					col = this.lastTurn.colIndex + (this._translations[i].x * j);
